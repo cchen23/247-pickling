@@ -54,11 +54,11 @@ def create_directory_paths(args):
     # Format directory logistics
     DATA_DIR = os.path.join(os.getcwd(), "data", args.project_id)
     CONV_DIRS = os.path.join(DATA_DIR, args.subject)
+    SCRATCH_DIR = os.path.join("/scratch", "gfps", args.user_id)
     SAVE_DIR = os.path.join(
-        os.getcwd(), "results", args.project_id, args.subject
+        SCRATCH_DIR, "results", args.project_id, args.subject
     )
     PKL_DIR = os.path.join(SAVE_DIR, "pickles")
-
     os.makedirs(PKL_DIR, exist_ok=True)
 
     DIR_DICT = dict(

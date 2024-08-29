@@ -53,7 +53,7 @@ endif
 # {echo | python}
 %-pickle: PRJCT_ID := tfs
 # {tfs | podcast}
-%-pickle: SID_LIST = 676
+%-pickle: SID_LIST = 798
 # {625 676 7170 798 | 661 662 717 723 741 742 743 763 798 | 777}
 
 create-pickle:
@@ -61,7 +61,8 @@ create-pickle:
 	for sid in $(SID_LIST); do \
 		$(CMD) scripts/tfspkl_main.py \
 			--project-id $(PRJCT_ID) \
-			--subject $$sid; \
+			--subject $$sid \
+			--user-id $(USER);
 	done
 
 # create pickle of significant electrodes (just for podcast)

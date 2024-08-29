@@ -25,6 +25,7 @@ def arg_parser():
     parser.add_argument("--vocab-min-freq", type=int, default=0)
     parser.add_argument("--num-folds", type=int, default=5)
     parser.add_argument("--project-id", type=str, default="podcast")
+    parser.add_argument("--user-id", type=str, help="used to determine save path")
 
     # If running the code in debug mode
     gettrace = getattr(sys, "gettrace", None)
@@ -39,7 +40,6 @@ def arg_parser():
             "--max-electrodes",
             "500",
         ]
-
     args = parser.parse_args()
 
     if not args.subject:
