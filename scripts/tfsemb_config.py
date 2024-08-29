@@ -47,7 +47,7 @@ def select_tokenizer_and_model(args):
             *tfsemb_dwnld.MLM_MODELS,
         ]:
             (args.model, args.tokenizer,) = tfsemb_dwnld.download_tokenizers_and_models(
-                item, local_files_only=True, debug=False
+                item, local_files_only=args.local_files_only, debug=False
             )[item]
         case _:
             print(
@@ -84,7 +84,8 @@ def setup_environ(args):
         set_context_length(args)
 
     DATA_DIR = os.path.join(os.getcwd(), "data", args.project_id)
-    RESULTS_DIR = os.path.join(os.getcwd(), "results", args.project_id)
+    SCRATCH_DIR = os.path.join("/scratch", "gpfs", args.user_id)
+    RESULTS_DIR = os.path.join(SCRATCH_DIR, "results", args.project_id)
 
     args.PKL_DIR = os.path.join(RESULTS_DIR, args.subject, "pickles")
     args.EMB_DIR = os.path.join(RESULTS_DIR, args.subject, "embeddings")

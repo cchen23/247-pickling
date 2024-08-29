@@ -16,7 +16,9 @@ def arg_parser():
     parser.add_argument("--conversation-id", type=int, default=0)
     parser.add_argument("--pkl-identifier", type=str, default=None)
     parser.add_argument("--project-id", type=str, default=None)
+    parser.add_argument("--user-id", type=str, help="used to determine save path")
     parser.add_argument("--layer-idx", nargs="*", default=["all"])
+    parser.add_argument("--local-files-only", type=bool, default=True)
 
     # If running the code in debug mode
     gettrace = getattr(sys, "gettrace", None)
