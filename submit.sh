@@ -1,12 +1,15 @@
 #!/bin/bash
-#SBATCH --time=02:10:00
-#SBATCH --mem=128GB
-#SBATCH --gres=gpu:1
+#SBATCH --job-name=pick_test
+#SBATCH --time=2:00:00
+#SBATCH --mem=700GB
 #SBATCH --nodes=1
-##SBATCH --cpus-per-task=4
+#SBATCH --cpus-per-task=2
 #SBATCH --open-mode=truncate
 #SBATCH -o './logs/%x.out'
 #SBATCH -e './logs/%x.err'
+#SBATCH --mail-type=begin        # send email when job begins
+#SBATCH --mail-type=end          # send email when job ends
+#SBATCH --mail-user=cc27@princeton.edu
  
 if [[ "$HOSTNAME" == *"tiger"* ]]
 then
@@ -30,12 +33,13 @@ echo "$@"
 echo 'Start time:' `date`
 start=$(date +%s)
 
-if [[ -v SLURM_ARRAY_TASK_ID ]]
-then
-    python "$@" --conversation-id $SLURM_ARRAY_TASK_ID
-else
-    python "$@"
-fi
+make create-pickle
+#if [[ -v SLURM_ARRAY_TASK_ID ]]
+#then
+#    python "$@" --conversation-id $SLURM_ARRAY_TASK_ID
+#else
+#    python "$@"
+#fi
 
 end=$(date +%s)
 echo 'End time:' `date`
