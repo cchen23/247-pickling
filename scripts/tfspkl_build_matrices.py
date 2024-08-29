@@ -10,6 +10,7 @@ from tfspkl_utils import (
     get_all_electrodes,
     get_conversation_list,
 )
+from utils import print_profile
 
 
 def extract_subject_and_electrode(input_str):
@@ -47,6 +48,7 @@ def build_design_matrices(CONFIG):
         labels: words/n-grams/sentences
     """
     if CONFIG["sig_elec_file"]:
+        print("Using sig_elec_file")
         try:
             # If the electrode file is in Bobbi's original format
             sigelec_list = pd.read_csv(CONFIG["sig_elec_file"], header=None)[
@@ -226,7 +228,7 @@ def process_data_for_pickles(CONFIG, electrode_labels=None):
         all_trimmed_examples.append(trimmed_examples)
 
         print(
-            f"{conv_idx:02d}",
+            f"{conv_idx:02d}/{len(conversations)}",
             os.path.basename(conversation),
             a,
             len(examples_df),
@@ -234,15 +236,22 @@ def process_data_for_pickles(CONFIG, electrode_labels=None):
             len(trimmed_examples),
             mean_binned_signal.shape[0],
         )
+        print_profile()
 
     full_signal = np.concatenate(full_signal)
     full_stitch_index = np.cumsum(full_stitch_index).tolist()
+    print("Created full signal")
+    print_profile()
 
     trimmed_signal = np.concatenate(trimmed_signal)
     trimmed_stitch_index = np.cumsum(trimmed_stitch_index).tolist()
+    print("Created trimmed signal")
+    print_profile()
 
     binned_signal = np.vstack(binned_signal)
     bin_stitch_index = np.cumsum(bin_stitch_index).tolist()
+    print("Created binned signal")
+    print_profile()
 
     return (
         full_signal,

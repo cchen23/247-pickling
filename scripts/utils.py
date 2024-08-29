@@ -1,5 +1,6 @@
 import os
 import pickle
+import psutil
 import subprocess
 from datetime import datetime
 
@@ -147,3 +148,9 @@ def create_folds(df, num_folds, split_str=None):
         df.loc[test_ixs, fold_col] = "test"
 
     return df
+
+
+def print_profile():
+    print("The CPU usage is: ", psutil.cpu_percent(4))
+    print("RAM memory % used:", psutil.virtual_memory()[2])
+    print("RAM Used (GB):", psutil.virtual_memory()[3]/1000000000)

@@ -12,14 +12,16 @@ import os
 import nltk
 import numpy as np
 import pandas as pd
+import time
 from nltk.stem import PorterStemmer as ps
 from nltk.stem import WordNetLemmatizer as lt
 from tfspkl_build_matrices import build_design_matrices
 from tfspkl_config import build_config
 from tfspkl_parser import arg_parser
-from utils import main_timer, save_pickle
+from utils import main_timer, print_profile, save_pickle
 
 nltk.download("omw-1.4")
+nltk.download("wordnet")
 
 
 def find_switch_points(array):
@@ -276,6 +278,8 @@ def create_labels_pickles(args, stitch_index, labels, convs, label_str=None):
 
 @main_timer
 def main():
+
+    start_time = time.time()
     # Read commandline arguments
     args = arg_parser()
 
@@ -298,6 +302,8 @@ def main():
         subject_id,
     ) = build_design_matrices(dict(vars(args)))
 
+    print(f"Built design matrices! {(time.time() - start_time) / 60} min")
+
     # Create pickle with full signal
     full_signal_dict = dict(
         full_signal=full_signal,
@@ -306,6 +312,8 @@ def main():
         electrode_names=electrode_names,
         subject=subject_id,
     )
+    print(f"Created full signal dict! {(time.time() - start_time) / 60} min")
+
     save_pickle(
         full_signal_dict,
         os.path.join(args.PKL_DIR, args.subject + "_full_signal"),
@@ -327,6 +335,7 @@ def main():
         electrode_map,
         os.path.join(args.PKL_DIR, args.subject + "_electrode_names"),
     )
+    print(f"Saved electrode map! {(time.time() - start_time) / 60} min")
 
     # Create pickle with trimmed signal
     trimmed_signal_dict = dict(
@@ -340,6 +349,7 @@ def main():
         trimmed_signal_dict,
         os.path.join(args.PKL_DIR, args.subject + "_trimmed_signal"),
     )
+    print(f"Saved trimmed signal dict! {(time.time() - start_time) / 60} min")
 
     # Create pickle with full stitch index
     save_pickle(
@@ -359,6 +369,7 @@ def main():
         binned_signal_dict,
         os.path.join(args.PKL_DIR, args.subject + "_binned_signal"),
     )
+    print(f"Saved binned signal dict! {(time.time() - start_time) / 60} min")
 
     # Create pickle with full stitch index
     save_pickle(
@@ -374,7 +385,7 @@ def main():
         conversations,
         "trimmed",
     )
-    print("SUCCESS: Trimmed Labels Pickle")
+    print(f"SUCCESS: Trimmed Labels Pickle {(time.time() - start_time) / 60} min")
 
     create_labels_pickles(
         args,
@@ -383,7 +394,7 @@ def main():
         conversations,
         "full",
     )
-    print("SUCCESS: Full Labels Pickle")
+    print(f"SUCCESS: Full Labels Pickle {(time.time() - start_time) / 60} min")
 
     return
 
