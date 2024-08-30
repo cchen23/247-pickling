@@ -12,7 +12,7 @@ import torch.utils.data as data
 from accelerate import Accelerator, find_executable_batch_size
 from tfsemb_config import setup_environ
 from tfsemb_parser import arg_parser
-from utils import load_pickle, main_timer
+from utils import load_pickle, print_profile
 from utils import save_pickle as svpkl
 
 
@@ -50,6 +50,7 @@ def check_token_is_root(args, df):
     df[token_is_root_string] = (
         df["word"]
         == df["token"]
+        .apply(lambda x: [x])
         .apply(args.tokenizer.convert_tokens_to_string)
         .str.strip()
     )
@@ -64,9 +65,9 @@ def convert_token_to_idx(args, df):
 
 def convert_token_to_word(args, df):
     assert "token" in df.columns, "token column is missing"
-
     df["token2word"] = (
         df["token"]
+        .apply(lambda x: [x])
         .apply(args.tokenizer.convert_tokens_to_string)
         .str.strip()
         .str.lower()
@@ -177,13 +178,13 @@ def process_extracted_logits(args, concat_logits, sentence_token_ids):
     if args.embedding_type in tfsemb_dwnld.CAUSAL_MODELS:
         if k == 1:
             predicted_words = [
-                args.tokenizer.convert_tokens_to_string(token)
+                args.tokenizer.convert_tokens_to_string([token])
                 for token in predicted_tokens
             ]
         else:
             predicted_words = [
                 [
-                    args.tokenizer.convert_tokens_to_string(token)
+                    args.tokenizer.convert_tokens_to_string([token])
                     for token in token_list
                 ]
                 for token_list in predicted_tokens
@@ -259,7 +260,8 @@ def model_forward_pass(args, data_dl):
         all_logits = []
         for batch_idx, batch in enumerate(data_dl):
             if batch_idx % 10 == 0:
-                print(f"Batch ID: {batch_idx}")
+                print(f"Batch ID: {batch_idx}/{len((data_dl))}")
+                print_profile()
             batch = batch.to(args.device)
             model_output = model(batch)
 
