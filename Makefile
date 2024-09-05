@@ -50,10 +50,11 @@ endif
 
 # settings for target: create-pickle, create-sig-pickle, upload-pickle
 %-pickle: CMD := python
+%-pickle: CMD := sbatch --job-name=create-pickle-$$sid submit.sh
 # {echo | python}
 %-pickle: PRJCT_ID := tfs
 # {tfs | podcast}
-%-pickle: SID_LIST = 798
+%-pickle: SID_LIST = 625 676 7170 # 798
 # {625 676 7170 798 | 661 662 717 723 741 742 743 763 798 | 777}
 
 create-pickle:
@@ -101,20 +102,20 @@ download-247-pickles:
 # {54 for 625 | 78 for 676 | 1 for 661 | 24 for 7170 | 15 for 798}
 %-embeddings: PKL_IDENTIFIER := full
 # {full | trimmed | binned}
-%-embeddings: EMB_TYPE := gpt2
+%-embeddings: EMB_TYPE := glove50
 # {"gpt2", "gpt2-large", "gpt2-xl", \
 "EleutherAI/gpt-neo-125M", "EleutherAI/gpt-neo-1.3B", "EleutherAI/gpt-neo-2.7B", \
 "EleutherAI/gpt-neox-20b", \
 "facebook/opt-125m", "facebook/opt-350m", "facebook/opt-1.3b", \
 "facebook/opt-2.7b", "facebook/opt-6.7b", "facebook/opt-30b", \
 "facebook/blenderbot_small-90M"}
-%-embeddings: CNXT_LEN := 8 16 32 64 128 256 512 2048
+%-embeddings: CNXT_LEN := 1024 #8 16 32 64 128 256 512 1024 2048
 %-embeddings: LAYER := last
 # {'all' for all layers | 'last' for the last layer | (list of) integer(s) >= 1}
 # Note: embeddings file is the same for all podcast subjects \
 and hence only generate once using subject: 661
 %-embeddings: JOB_NAME = $(subst /,-,$(EMB_TYPE))
-%-embeddings: CMD = sbatch --job-name=$(SID)-$(JOB_NAME)-cnxt-$$cnxt_len submit.sh
+%-embeddings: CMD = sbatch --job-name=$(SID)-$(JOB_NAME)-cnxt-$$cnxt_len-$$conv_id submit.sh
 # {echo | python | sbatch --job-name=$(SID)-$(JOB_NAME)-cnxt-$$cnxt_len submit.sh}
 
 # 38 and 39 failed
@@ -129,7 +130,7 @@ generate-base-for-embeddings:
 			--user-id $(USER);
 
 # generates embeddings (for each conversation separately)
-generate-embeddings: generate-base-for-embeddings
+generate-embeddings: 
 	mkdir -p logs
 	for cnxt_len in $(CNXT_LEN); do \
 		for conv_id in $(CONV_IDS); do \
@@ -140,7 +141,8 @@ generate-embeddings: generate-base-for-embeddings
 				--conversation-id $$conv_id \
 				--embedding-type $(EMB_TYPE) \
 				--layer-idx $(LAYER) \
-				--context-length $$cnxt_len; \
+				--context-length $$cnxt_len \
+				--user-id $(USER);
 		done; \
 	done;
 
@@ -152,7 +154,8 @@ concatenate-embeddings:
 			--pkl-identifier $(PKL_IDENTIFIER) \
 			--subject $(SID) \
 			--embedding-type $(EMB_TYPE) \
-			--context-length $$cnxt_len; \
+			--context-length $$cnxt_len \
+			--user-id $(USER);
 	done;
 
 # Podcast: copy embeddings to other subjects as well
