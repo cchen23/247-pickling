@@ -1,5 +1,6 @@
 import glob
 import os
+import time
 
 import numpy as np
 import pandas as pd
@@ -235,6 +236,8 @@ def process_data_for_pickles(CONFIG, electrode_labels=None):
             ecogs.shape[0],
             len(trimmed_examples),
             mean_binned_signal.shape[0],
+            "time: ",
+            time.ctime()
         )
         print_profile()
 

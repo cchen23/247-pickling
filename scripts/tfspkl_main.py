@@ -345,11 +345,11 @@ def main():
         electrode_names=electrode_names,
         subject=subject_id,
     )
-    save_pickle(
-        trimmed_signal_dict,
-        os.path.join(args.PKL_DIR, args.subject + "_trimmed_signal"),
-    )
-    print(f"Saved trimmed signal dict! {(time.time() - start_time) / 60} min")
+    #save_pickle(
+    #    trimmed_signal_dict,
+    #    os.path.join(args.PKL_DIR, args.subject + "_trimmed_signal"),
+    #)
+    #print(f"Saved trimmed signal dict! {(time.time() - start_time) / 60} min")
 
     # Create pickle with full stitch index
     save_pickle(

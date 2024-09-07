@@ -1,6 +1,6 @@
 import os
 import pickle
-import sys
+import time
 
 import gensim.downloader as api
 import numpy as np
@@ -249,6 +249,7 @@ def extract_select_vectors_all_layers(batch_idx, array, layers=None):
 
 
 def model_forward_pass(args, data_dl):
+    t0 = time.time()
     model = args.model
     device = args.device
 
@@ -259,9 +260,8 @@ def model_forward_pass(args, data_dl):
         all_embeddings = []
         all_logits = []
         for batch_idx, batch in enumerate(data_dl):
-            if batch_idx % 10 == 0:
-                print(f"Batch ID: {batch_idx}/{len((data_dl))}")
-                print_profile()
+            print(f"Batch idx: {batch_idx}/{len((data_dl))}, {(time.time() - t0) / 60}")
+            print_profile()
             batch = batch.to(args.device)
             model_output = model(batch)
 
@@ -544,6 +544,7 @@ def inference_function(args, model_input):
 
 
 def generate_causal_embeddings(args, df):
+    t0 = time.time()
     if args.embedding_type in tfsemb_dwnld.CAUSAL_MODELS:
         args.tokenizer.pad_token = args.tokenizer.eos_token
     final_embeddings = []
@@ -555,8 +556,10 @@ def generate_causal_embeddings(args, df):
 
     token_list = df["token_id"].tolist()
     model_input = make_input_from_tokens(args, token_list)
+    print(f"Extracted input from tokens {(time.time() - t0) / 60}")
     embeddings, logits = inference_function(args, model_input)
 
+    print(f"Performed inference function {(time.time() - t0) / 60}")
     embeddings = process_extracted_embeddings_all_layers(args, embeddings)
     for _, item in embeddings.items():
         assert item.shape[0] == len(token_list)
@@ -569,6 +572,7 @@ def generate_causal_embeddings(args, df):
         true_y_rank,
         entropy,
     ) = process_extracted_logits(args, logits, model_input)
+    print(f"Processed extracted logits {(time.time() - t0) / 60}")
     final_top1_word.extend(top1_word)
     final_top1_prob.extend(top1_prob)
     final_true_y_prob.extend(true_y_prob)
@@ -613,6 +617,7 @@ def generate_glove_embeddings(args, df):
 
 # @main_timer
 def main():
+    t0 = time.time()
     args = arg_parser()
     setup_environ(args)
 
@@ -620,7 +625,7 @@ def main():
         base_df = load_pickle(args.base_df_file)
     else:
         raise Exception("Base dataframe does not exist")
-
+    print(f"Loaded base_df {(time.time() - t0) / 60}")
     utterance_df = select_conversation(args, base_df)
     assert len(utterance_df) != 0, "Empty dataframe"
 
@@ -641,15 +646,17 @@ def main():
     output = generate_func(args, utterance_df)
     if len(output) == 3:
         df, df_logits, embeddings = output
-        if not df_logits.empty:
-            svpkl(
-                df_logits,
-                os.path.join(args.logits_folder, args.output_file_name),
-            )
+        # Don't save logits because files too big.
+        #if not df_logits.empty:
+        #    svpkl(
+        #        df_logits,
+        #        os.path.join(args.logits_folder, args.output_file_name),
+        #    )
     else:
         df = output
-
+    print(f"Generated embeddings {(time.time() - t0) / 60}")
     save_pickle(args, df, embeddings)
+    print(f"Saved pickle {(time.time() - t0) / 60}")
 
     return
 

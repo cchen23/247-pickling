@@ -54,7 +54,7 @@ def create_directory_paths(args):
     # Format directory logistics
     DATA_DIR = os.path.join(os.getcwd(), "data", args.project_id)
     CONV_DIRS = os.path.join(DATA_DIR, args.subject)
-    SCRATCH_DIR = os.path.join("/scratch", "gfps", args.user_id)
+    SCRATCH_DIR = os.path.join("/scratch", "gpfs", args.user_id)
     SAVE_DIR = os.path.join(
         SCRATCH_DIR, "results", args.project_id, args.subject
     )

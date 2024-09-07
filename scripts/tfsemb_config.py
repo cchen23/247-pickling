@@ -93,6 +93,7 @@ def setup_environ(args):
     args.trimmed_model_name = tfsemb_dwnld.clean_lm_model_name(args.embedding_type)
 
     args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("DEVICE: ", args.device)
 
     args.labels_pickle = os.path.join(
         args.PKL_DIR,

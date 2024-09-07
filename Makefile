@@ -49,12 +49,12 @@ endif
 	ln -sf /projects/HASSON/247/data/$(DIR_KEY)/* data/$(PRJCT_ID)/
 
 # settings for target: create-pickle, create-sig-pickle, upload-pickle
-%-pickle: CMD := python
 %-pickle: CMD := sbatch --job-name=create-pickle-$$sid submit.sh
+%-pickle: CMD := python
 # {echo | python}
 %-pickle: PRJCT_ID := tfs
 # {tfs | podcast}
-%-pickle: SID_LIST = 625 676 7170 # 798
+%-pickle: SID_LIST = 676 # 7170 625 798
 # {625 676 7170 798 | 661 662 717 723 741 742 743 763 798 | 777}
 
 create-pickle:
@@ -96,20 +96,20 @@ download-247-pickles:
 ## settings for targets: generate-embeddings, concatenate-embeddings
 %-embeddings: PRJCT_ID := tfs
 # {tfs | podcast}
-%-embeddings: SID := 798
+%-embeddings: SID = 7170
 # {625 | 676 | 7170 | 798 | 661} 
-%-embeddings: CONV_IDS = $(shell seq 1 15) 
+%-embeddings: CONV_IDS = $(shell seq 1 24) 
 # {54 for 625 | 78 for 676 | 1 for 661 | 24 for 7170 | 15 for 798}
 %-embeddings: PKL_IDENTIFIER := full
 # {full | trimmed | binned}
-%-embeddings: EMB_TYPE := glove50
+%-embeddings: EMB_TYPE := gpt2-xl
 # {"gpt2", "gpt2-large", "gpt2-xl", \
 "EleutherAI/gpt-neo-125M", "EleutherAI/gpt-neo-1.3B", "EleutherAI/gpt-neo-2.7B", \
 "EleutherAI/gpt-neox-20b", \
 "facebook/opt-125m", "facebook/opt-350m", "facebook/opt-1.3b", \
 "facebook/opt-2.7b", "facebook/opt-6.7b", "facebook/opt-30b", \
 "facebook/blenderbot_small-90M"}
-%-embeddings: CNXT_LEN := 1024 #8 16 32 64 128 256 512 1024 2048
+%-embeddings: CNXT_LEN := 1024
 %-embeddings: LAYER := last
 # {'all' for all layers | 'last' for the last layer | (list of) integer(s) >= 1}
 # Note: embeddings file is the same for all podcast subjects \
@@ -144,7 +144,7 @@ generate-embeddings:
 				--context-length $$cnxt_len \
 				--user-id $(USER);
 		done; \
-	done;
+	done; \
 
 # concatenate embeddings from all conversations
 concatenate-embeddings:

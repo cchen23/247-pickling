@@ -54,6 +54,7 @@ def save_pickle(item, file_name):
     file_name = file_name + add_ext
 
     os.makedirs(os.path.dirname(file_name), exist_ok=True)
+    print(f"SAVING TO {file_name}")
 
     with open(file_name, "wb") as fh:
         pickle.dump(item, fh)

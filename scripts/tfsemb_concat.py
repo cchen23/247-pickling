@@ -28,7 +28,7 @@ def removeEmptyfolders(path):
             pass
 
 
-def main():
+def main(use_interactive=True):
     args = arg_parser()
     setup_environ(args)
 
@@ -40,6 +40,8 @@ def main():
         num_convs = 78
     elif args.subject == "7170":
         num_convs = 24
+    elif args.subject == "798":
+        num_convs = 15
     else:
         num_convs = 1
 
@@ -62,9 +64,9 @@ def main():
     )
     os.makedirs(os.path.dirname(dst), exist_ok=True)
     if os.path.exists(dst):
-        print("Base DataFrame Exists")
+        print(f"Base DataFrame Exists at {dst}")
     else:
-        print("Moving Base DataFrame")
+        print(f"Copying Base DataFrame from {src} to {dst}")
         shutil.copy(src, dst)
 
     if not os.path.isdir(args.output_dir):
@@ -74,7 +76,6 @@ def main():
         layer_folders = sorted(
             [x for x in pathlib.Path(args.output_dir).glob("*") if x.is_dir()]
         )
-
     for layer_folder in tqdm(
         layer_folders, bar_format="Merging Layer..{n_fmt}"
     ):
@@ -88,7 +89,9 @@ def main():
                 f"\nBad conversation size: found {n} out of {num_convs}",
                 f"in {args.output_dir}",
             )
-            continue
+            if use_interactive:
+                if not confirm_prompt("Continue anyways?"):
+                    continue
 
         all_df = [
             load_pickle(conversation) for conversation in conversation_pickles
@@ -107,6 +110,7 @@ def main():
 
         full_emb_out_file = os.path.join(args.PKL_DIR, args.emb_out_file)
         os.makedirs(os.path.dirname(full_emb_out_file), exist_ok=True)
+        print(f"Saving to {full_emb_out_file}")
         save_pickle(all_exs, full_emb_out_file)
 
         if False:
@@ -130,15 +134,17 @@ def main():
                 save_pickle(all_exs, os.path.join(args.emb_out_dir, fn))
 
     # Deleting embeddings after concatenation
-    if confirm_prompt(
-        "Embeddings Concatenated. Do you want to delete the original files?"
-    ):
-        shutil.rmtree(args.output_dir, ignore_errors=True)
-        os.remove(src)
-        removeEmptyfolders(args.EMB_DIR)
+    if use_interactive:
+        if confirm_prompt(
+            "Embeddings Concatenated. Do you want to delete the original files?"
+        ):
+            shutil.rmtree(args.output_dir, ignore_errors=True)
+            if os.path.exists(src):
+                os.remove(src)
+            removeEmptyfolders(args.EMB_DIR)
 
-    else:
-        print("OK, Keeping them. Bye!")
+        else:
+            print("OK, Keeping them. Bye!")
 
 
 if __name__ == "__main__":
